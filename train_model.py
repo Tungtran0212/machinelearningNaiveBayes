@@ -38,7 +38,6 @@ def main():
             "The dataset must contain a column named 'Prediction'."
         )
 
-    # Same feature selection used in your original notebook
     X = df.iloc[:, 1:-1]
     y = df["Prediction"]
 
@@ -72,25 +71,38 @@ def main():
             zero_division=0
         )
     )
+    
+    model_vocabulary = {
+        feature_name: feature_index
+        for feature_index, feature_name in enumerate(X.columns)
+    }
+
+    vectorizer = CountVectorizer(
+        vocabulary=model_vocabulary,
+        lowercase=False,
+    )
+
+    vectorizer.transform([""])
 
     print("\nConfusion matrix:")
     print(confusion_matrix(y_test, predictions))
 
-    # Use exactly the same vocabulary/order as the dataset columns
-    model_vocabulary = list(X.columns)
-
-    vectorizer = CountVectorizer(
-        vocabulary=model_vocabulary
-    )
-
-    # Save the trained custom classifier
+    #
     joblib.dump(classifier, MODEL_FILE)
-
-    # Save the vocabulary-compatible vectorizer
     joblib.dump(vectorizer, VECTORIZER_FILE)
 
-    print(f"\nSaved classifier to: {MODEL_FILE}")
+    print(f"Saved classifier to: {MODEL_FILE}")
     print(f"Saved vectorizer to: {VECTORIZER_FILE}")
+    print(
+        "Classifier feature-count shape:",
+        classifier._feature_counts.shape,
+    )
+    print(
+        "Vectorizer vocabulary size:",
+        len(vectorizer.vocabulary_),
+    )
+
+
 
     # Test loading immediately
     loaded_classifier = joblib.load(MODEL_FILE)
